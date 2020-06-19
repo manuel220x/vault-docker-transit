@@ -46,7 +46,7 @@ RUN set -eux; \
     apk del gnupg openssl && \
     rm -rf /root/.gnupg
 
-RUN apk add curl wget vim htop openssl
+RUN apk add curl wget vim htop openssl jq
 
 # /vault/logs is made available to use as a location to store audit logs, if
 # desired; /vault/file is made available to use as a location with the file

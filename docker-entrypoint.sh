@@ -26,10 +26,13 @@ elif vault --help "$1" 2>&1 | grep -q "vault $1"; then
 fi
 # Generat Cert
 
-if [[ ! -f /vault/certs/cert.pem ]]; then
+if [ ! -f /vault/certs/cert.pem ]; then
 openssl req -x509 -newkey rsa:2048 -keyout /vault/certs/key.pem \
     -out /vault/certs/cert.pem -days 365 -nodes \
-    -subj "/C=US/ST=California/L=San Jose/O=DoU/OU=DevOps/CN=localhost"
+    -subj "/C=US/ST=California/L=San Jose/O=DoU/OU=DevOps/CN=localhost" \
+    -addext "subjectAltName = DNS:vaulttransit"
+chown vault:vault /vault/certs/cert.pem
+chown vault:vault /vault/certs/key.pem
 fi
 
 # If we are running Vault, make sure it executes as the proper user.
@@ -59,11 +62,9 @@ if [ "$1" = 'vault' ]; then
             setcap cap_ipc_lock=-ep $(readlink -f $(which vault))
         fi
     fi
-
     if [ "$(id -u)" = '0' ]; then
-      set -- su-exec vault "$@"
+        set -- su-exec vault "$@"
     fi
 fi
-
 
 exec "$@"
