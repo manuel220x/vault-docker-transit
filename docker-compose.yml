@@ -1,0 +1,23 @@
+version: '3'
+services:
+  vaulttransit:
+    image: vault:local
+    volumes:
+      - /Users/a/dou/tmp/vault/file:/vault/file
+      - /Users/a/dou/tmp/vault/certs:/vault/certs
+    build: .
+    ports:
+      - "8201:8200"
+    cap_add:
+      - IPC_LOCK
+  initializer:
+    image: vault:local
+    depends_on:
+      - vaulttransit
+    environment:
+      - VAULT_ADDR=https://vaulttransit:8200
+      - VAULT_CACERT=/vault/certs/cert.pem
+    command: setup
+    volumes:
+      - /Users/a/dou/tmp/vault/certs:/vault/certs
+    

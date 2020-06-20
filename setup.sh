@@ -1,4 +1,6 @@
-
+#!/usr/bin/dumb-init /bin/sh
+# Based on official hashicorp's entrypoint
+set -e
 #vault-docker-transit_vaulttransit_1
 
 
@@ -8,12 +10,15 @@
 #VAULT_ADDR=https://vaulttransit:8200
 #VAULT_CACERT=/vault/certs/cert.pem
 
+echo "Waiting.."
+sleep 10
+echo "Starting.."
 
 initialized=`vault status -format=json | jq '.initialized'`
 sealed=`vault status -format=json | jq '.sealed'`
 
 
-if [ $initialized = "false" ]; then
+if [ "$initialized" = "false" ]; then
     echo "Initializing"
     initstatus=`vault operator init -key-shares=1 -key-threshold=1 -format=json`
     vault operator init -status
@@ -28,21 +33,21 @@ if [ $initialized = "false" ]; then
     initialized=`vault status -format=json | jq '.initialized'`
 fi
 
-if [ $initialized = "true" ] && [ $sealed = "true" ]; then
+if [ "$initialized" = "true" ] && [ "$sealed" = "true" ]; then
     key=`cat /vault/certs/key`
     vault operator unseal -format=json $key
     sealed=`vault status -format=json | jq '.sealed'`
-    if [ $sealed = "true" ]; then
+    if [ "$sealed" = "true" ]; then
         echo "Unseal Failed"
         exit -1
     fi
 fi
 
 
-if [ $initialized = "true" ] && [ $sealed = "false" ]; then
+if [ "$initialized" = "true" ] && [ "$sealed" = "false" ]; then
     export VAULT_TOKEN=`cat /vault/certs/token`
     has_transit=`vault secrets list -format=json | jq '.transit'`
-    if [ $has_transit = "null" ]; then
+    if [ "$has_transit" = "null" ]; then
         vault secrets enable transit
         vault write -f transit/keys/unseal_key
     fi

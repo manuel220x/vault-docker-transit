@@ -73,6 +73,8 @@ VOLUME /vault/file
 EXPOSE 8200
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY setup.sh /usr/local/bin/setup.sh
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 

@@ -11,6 +11,11 @@ ulimit -c 0
 # VAULT_LOCAL_CONFIG below.
 VAULT_CONFIG_DIR=/vault/config
 
+if [ "$1" = 'setup' ]; then
+    /usr/local/bin/setup.sh
+    exit 0
+fi
+
 # Look for Vault subcommands.
 if [ "$1" = 'server' ]; then
     shift
