@@ -46,10 +46,29 @@ fi
 
 if [ "$initialized" = "true" ] && [ "$sealed" = "false" ]; then
     export VAULT_TOKEN=`cat /vault/certs/token`
-    has_transit=`vault secrets list -format=json | jq '.transit'`
+    has_transit=`vault secrets list -format=json | jq '."transit/"'`
     if [ "$has_transit" = "null" ]; then
+        echo "Enabling Transit Engine"
         vault secrets enable transit
-        vault write -f transit/keys/unseal_key
+        vault write -f transit/keys/defaultautounseal
+        vault policy write defaultautounseal /vault/config/autounseal.hcl
+    else
+        echo "Transit Engine Already Enabled!"
+    fi
+    has_default=`vault list -format=json transit/keys | jq '.[] |  select(. =="defaultautounseal")' | wc -l`
+    if [ $has_default = 0 ]; then
+        echo "Creating Default Key"
+        vault write -f transit/keys/defaultautounseal
+    else
+        echo "Default Key already exist!"
+    fi
+
+    has_policy=`vault policy list | grep defaultautounseal | wc -l`
+    if [ $has_policy = 0 ]; then
+        echo "Creating Policy"
+        vault policy write defaultautounseal /vault/config/autounseal.hcl
+    else
+        echo "Polocy Already created!"
     fi
 
 fi

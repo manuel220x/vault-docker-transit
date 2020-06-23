@@ -79,6 +79,7 @@ ENTRYPOINT ["docker-entrypoint.sh"]
 
 
 COPY config/local.json /vault/config/local.json
+COPY config/autounseal.hcl /vault/config/autounseal.hcl
 
 # By default you'll get a single-node development server that stores everything
 # in RAM and bootstraps itself. Don't use this configuration for production.
