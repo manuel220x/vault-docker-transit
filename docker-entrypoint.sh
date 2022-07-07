@@ -35,7 +35,7 @@ if [ ! -f /vault/certs/cert.pem ]; then
 openssl req -x509 -newkey rsa:2048 -keyout /vault/certs/key.pem \
     -out /vault/certs/cert.pem -days 365 -nodes \
     -subj "/C=US/ST=California/L=San Jose/O=DoU/OU=DevOps/CN=localhost" \
-    -addext "subjectAltName = DNS:vaulttransit, DNS:transitvault.armada-azteca.com"
+    -addext "subjectAltName = DNS:vaulttransit, DNS:localhost, IP:127.0.0.1"
 chown vault:vault /vault/certs/cert.pem
 chown vault:vault /vault/certs/key.pem
 fi

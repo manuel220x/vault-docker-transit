@@ -10,6 +10,8 @@ set -e
 #VAULT_ADDR=https://vaulttransit:8200
 #VAULT_CACERT=/vault/certs/cert.pem
 
+TOKENS_FILE="/vault/transit_tokens"
+
 echo "Waiting.."
 sleep 10
 echo "Starting.."
@@ -70,5 +72,24 @@ if [ "$initialized" = "true" ] && [ "$sealed" = "false" ]; then
     else
         echo "Polocy Already created!"
     fi
+
+    if [[ -f ${TOKENS_FILE} ]]; then
+        num_tokens=`wc -l ${TOKENS_FILE} | awk '{print $1}'`
+        echo "Tokens file already exist and so far we have created: ${num_tokens} tokens"
+    else
+        echo "Tokens file is new"
+    fi
+    
+    echo "Create a file with the below content and set your VAULT_CACERT variable to this:"
+
+    cat $VAULT_CACERT
+
+    echo ""
+    echo "Creating new token"
+
+    new_transit_token=`vault token create -policy=defaultautounseal -format=json | jq '("Token: " + .auth.client_token + " Accessor: " + .auth.accessor)'`
+    echo ${new_transit_token}
+
+    echo ${new_transit_token} >> ${TOKENS_FILE}
 
 fi
